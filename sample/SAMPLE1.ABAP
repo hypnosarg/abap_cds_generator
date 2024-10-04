@@ -1,37 +1,4 @@
-class ZCL_ACPF_CDS_GENERATOR_STRLST definition
-  public
-  inheriting from ZCL_ACPF_CDS_GENERATOR
-  final
-  create public .
 
-public section.
-
-  methods GENERATE
-    redefinition .
-protected section.
-private section.
-
-  data GS_STRUCTURED_LIST type ZACPF_C_LG_DV_V .
-  data GT_STRUCTURED_LIST_FIELDS type ZACPF_T_ARC003_SVL_ITEMS .
-
-  methods LOAD_CONFIG
-    raising
-      ZCX_ACPF_CDS_GENERATOR .
-ENDCLASS.
-
-
-
-CLASS ZCL_ACPF_CDS_GENERATOR_STRLST IMPLEMENTATION.
-
-
-  METHOD generate.
-    DATA:
-      lo_type              TYPE REF TO cl_abap_typedescr,
-      lo_data_element_type TYPE REF TO cl_abap_elemdescr.
-
-    load_config( ).
-
-    TRY.
         DATA(lo_cds_generator) = NEW zcl_caut_cds_generator( ).
         lo_cds_generator->set_overwrite( abap_true ).
 
@@ -135,38 +102,6 @@ CLASS ZCL_ACPF_CDS_GENERATOR_STRLST IMPLEMENTATION.
             iv_cds_name = gs_structured_list-cds_view
             io_previous = lo_generator_exception.
     ENDTRY.
-  ENDMETHOD.
 
 
-  METHOD load_config.
-    " do not load if already loaded
-    CHECK gs_structured_list IS INITIAL.
-
-    SELECT SINGLE *
-      FROM zacpf_c_lg_dv_v
-      WHERE logical_group = @gv_logical_group
-        AND list_name = @gv_parameter_name
-      INTO @gs_structured_list.
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE zcx_acpf_cds_generator
-        EXPORTING
-          iv_textid         = zcx_acpf_cds_generator=>gc_header_config_not_found
-          iv_logical_group  = gv_logical_group
-          iv_parameter_name = gv_parameter_name.
-    ENDIF.
-
-    SELECT *
-      FROM zacpf_c_lg_dv_i
-      WHERE logical_group = @gv_logical_group
-        AND list_name = @gv_parameter_name
-      ORDER BY sequence
-      INTO TABLE @gt_structured_list_fields.
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE zcx_acpf_cds_generator
-        EXPORTING
-          iv_textid         = zcx_acpf_cds_generator=>gc_items_config_not_found
-          iv_logical_group  = gv_logical_group
-          iv_parameter_name = gv_parameter_name.
-    ENDIF.
-  ENDMETHOD.
-ENDCLASS.
+ 
